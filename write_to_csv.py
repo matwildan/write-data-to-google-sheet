@@ -353,14 +353,14 @@ def write_country():
 def main():
     if len(sys.argv) != 2:
         print("Usage: python3 <file name> <sheet number>")
+    if sys.argv[2] == 'all':
+        write_data(csv_filename, sheetnum)
     #write_email()
     #write_phone()
     #write_name()
     #write_zip()
     #write_city()
     #write_country()
-    elif sys.argv[2] == 'all':
-        write_data(csv_filename, sheetnum)
 
 if __name__ == "__main__":
     main()
