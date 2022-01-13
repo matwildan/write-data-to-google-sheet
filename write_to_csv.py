@@ -7,39 +7,6 @@ import csv
 #from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2.service_account import Credentials
 
-#define the scope
-#scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
-scope = ['https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive']
-
-#add creds to the acc
-creds = Credentials.from_service_account_file("client_secret.json", scopes=scope)
-
-# authorize the clientsheet 
-client = gspread.authorize(creds)
-
-# get the instance of the Spreadsheet
-sheet = client.open('Data december')
-
-#csv_file = "orders_export_1.csv"
-print(sys.argv[0])
-csv_filename = sys.argv[0]
-print(sys.argv[1])
-sheetnum = sys.argv[1]
-
-# get the first sheet of the Spreadsheet
-#sheet1 = sheet.get_worksheet(0)
-sheet1 = sheet.get_worksheet(sheetnum)
-
-df = pd.DataFrame(data=sheet1.get_all_records())
-#print(df)
-
-col_list = ["TRUE", "Email", "Billing Phone", "Billing Name", "Billing Zip", "Billing Zip", "Billing City", "Billing Country"]
-
-#df_csv = pd.read_csv('orders_export_1.csv', na_filter=False)
-df_csv = pd.read_csv('orders_export_1.csv', na_filter=False)
-df_col = pd.read_csv(csv_file, usecols=col_list, na_filter=False)
-
 def write_data(csv_filename, sheetnum):
     id = df_col['TRUE']
     print(id)
@@ -103,8 +70,6 @@ def write_data(csv_filename, sheetnum):
         print(cells)
         try:
             #sheet1.update(cells,[[email_fix, phone_fix, first_name_fix, last_name_fix, zip_code_fix, city_fix, country_fix]])
-            #sheet1.update_cell(2,email_column,email_fix)
-            #sheet1.append_rows(values=[[email_fix, phone_fix, first_name_fix, last_name_fix, zip_code_fix, city_fix, country_fix]])
             print("[INFO] Datas have been writed!")
         except Exception as e:
             print("[ERROR] Error: ", e)
@@ -163,9 +128,8 @@ def edit_phone(phone_num):
 
 def write_email():
     email_column = 1
-    email = df_csv['Email']
-    name = df_csv['Shipping Name']
-    print(email)
+    email = df_col['Email']
+    #print(email)
 
     firstRow = len(sheet1.col_values(email_column))
     print(firstRow)
@@ -180,18 +144,18 @@ def write_email():
         #    projCol = projCol - 1
         #    continue
         if row == row_before and row_before != '':
-        #if row == row_before and row_before != '' and name.empty == False:
             projCol = projCol - 1
             continue
         row_before = row
         count = count + 1
         print(projCol, row)
         sheet1.update_cell(projCol,email_column,row)
+        print("[INFO] Datas have been writed!")
         time.sleep(1)
 
 def write_phone():
     phone_column = 2
-    phone = df_csv['Phone']
+    phone = df_col['Billing Phone']
     print(phone)
 
     firstRow = len(sheet1.col_values(phone_column))
@@ -217,8 +181,6 @@ def write_phone():
         index = row.find("62")
         find_zero = row.find("0")
         find_eight = row.find("8")
-        print(index)
-        print(find_zero)
         if index == -1 and find_zero < 1:
             row = row.replace("0","62",1)
             print(row)
@@ -227,13 +189,14 @@ def write_phone():
         row_before = row
         #count = count + 1
         print(projCol, row)
-        sheet1.update_cell(projCol,phone_column,row)
+        #sheet1.update_cell(projCol,phone_column,row)
+        print("[INFO] Datas have been writed!")
         time.sleep(1)
 
 def write_name():
     first_name_column = 3
     last_name_column = 4
-    name = df_csv['First Name']
+    name = df_col['Billing Name']
     print(name)
 
     firstRow = len(sheet1.col_values(first_name_column))
@@ -263,12 +226,13 @@ def write_name():
         print(projCol, row)
         sheet1.update_cell(projCol,first_name_column,first)
         time.sleep(1)
-        sheet1.update_cell(projCol,last_name_column,last)
+        #sheet1.update_cell(projCol,last_name_column,last)
+        print("[INFO] Datas have been writed!")
         time.sleep(1)
 
 def write_zip():
     zip_column = 5
-    zip = df_csv['Billing Zip']
+    zip = df_col['Billing Zip']
     print(zip)
 
     firstRow = len(sheet1.col_values(zip_column))
@@ -292,12 +256,13 @@ def write_zip():
             row = row.replace(char,"")
         print(row)
         print(projCol, row)
-        sheet1.update_cell(projCol,zip_column,row)
+        #sheet1.update_cell(projCol,zip_column,row)
+        print("[INFO] Datas have been writed!")
         time.sleep(1)
 
 def write_city():
     city_column = 6
-    city = df_csv['Billing City']
+    city = df_col['Billing City']
     print(city)
 
     firstRow = len(sheet1.col_values(city_column))
@@ -319,12 +284,13 @@ def write_city():
         print(row)
         print(projCol, row)
         #sheet1.update_cell(projCol,city_column,row)
+        print("[INFO] Datas have been writed!")
         time.sleep(1)
 
 def write_country():
     country_column = 7
-    #country = df_csv['Billing Country']
-    country = df_csv['Country']
+    country = df_col['Billing Country']
+    #country = df_col['Country']
     print(country)
 
     firstRow = len(sheet1.col_values(country_column))
@@ -347,20 +313,71 @@ def write_country():
         row_country = pycountry.countries.get(alpha_2=row)
         row_country = row_country.name
         print(projCol, row_country)
-        sheet1.update_cell(projCol,country_column,row_country)
+        #sheet1.update_cell(projCol,country_column,row_country)
+        print("[INFO] Datas have been writed!")
         time.sleep(1)
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python3 <file name> <sheet number>")
-    if sys.argv[2] == 'all':
+def main(column):
+    if column == 'all':
         write_data(csv_filename, sheetnum)
-    #write_email()
-    #write_phone()
-    #write_name()
-    #write_zip()
-    #write_city()
-    #write_country()
+    elif column == 'email':
+        print("[INFO] Write email from CSV")
+        write_email()
+    elif column == 'phone':
+        print("[INFO] Write phone from CSV")
+        write_phone()
+    elif column == 'name':
+        print("[INFO] Write name from CSV")
+        write_name()
+    elif column == 'zip':
+        print("[INFO] Write zip from CSV")
+        write_zip()
+    elif column == 'city':
+        print("[INFO] Write city from CSV")
+        write_city()
+    elif column == 'country':
+        print("[INFO] Write country from CSV")
+        write_country()
+    else:
+        print("[ERROR] No column suitable!")
+        print("Usage: python3 <file name> <sheet number> <column which you want to write>")
 
 if __name__ == "__main__":
-    main()
+    try:
+        csv_filename = sys.argv[1]
+        print("[INFO] File name: ",csv_filename)
+        sheetnum = int(sys.argv[2])
+        print("[INFO] Sheet number: ",sheetnum)
+        column = sys.argv[3]
+        print("[INFO] Column which you want to write: ",column)
+
+        #define the scope
+        scope = ['https://www.googleapis.com/auth/spreadsheets',
+                'https://www.googleapis.com/auth/drive']
+
+        #add creds to the acc
+        creds = Credentials.from_service_account_file("../client_secret.json", scopes=scope)
+
+        # authorize the clientsheet 
+        client = gspread.authorize(creds)
+
+        # get the instance of the Spreadsheet
+        sheet = client.open('Data december')
+
+        # get the sheet num of the Spreadsheet
+        sheet1 = sheet.get_worksheet(sheetnum)
+
+        df = pd.DataFrame(data=sheet1.get_all_records())
+        #print(df)
+
+        col_list = ["TRUE", "Email", "Billing Phone", "Billing Name", "Billing Zip", "Billing Zip", "Billing City", "Billing Country"]
+        df_col = pd.read_csv(csv_filename, usecols=col_list, na_filter=False)
+
+        #if len(sys.argv) != 2 or len(sys.argv) > 2 or len(sys.argv) == 0:
+        #    print("Usage: python3 <file name> <sheet number>")
+        #else:
+        main(column)
+
+    except Exception as e:
+        print("Usage: python3 <file name> <sheet number> <column which you want to write>")
+        print(e)
